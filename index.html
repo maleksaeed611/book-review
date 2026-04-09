@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookVerse PRO+</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #020617;
+            overflow-x: hidden;
+            color: white;
+            scroll-behavior: smooth;
+        }
+
+        h1, h2, h3 { font-family: 'Poppins', sans-serif; }
+
+        .card, .glass-box {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            border-color: rgba(249, 115, 22, 0.4);
+        }
+
+        canvas#bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #hero-canvas-container {
+            width: 100%;
+            height: 350px;
+            cursor: move;
+        }
+
+        .section-divider {
+            border-left: 4px solid #f97316;
+            padding-left: 1rem;
+        }
+
+        .btn-buy {
+            background: linear-gradient(90deg, #f97316, #ea580c);
+            transition: all 0.3s ease;
+        }
+        .btn-buy:hover {
+            box-shadow: 0 0 15px rgba(249, 115, 22, 0.4);
+            transform: scale(1.02);
+        }
+
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        
+        details[open] summary svg { transform: rotate(180deg); }
+
+        #review-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Success Animation Classes */
+        .celebrate-text {
+            animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: translate(-50%, 20px) scale(0.5); opacity: 0; }
+            50% { transform: translate(-50%, -10px) scale(1.1); opacity: 1; }
+            100% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+        }
+
+        .footer-link {
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        .footer-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 1px;
+            bottom: -2px;
+            left: 0;
+            background-color: #f97316;
+            transition: width 0.3s ease;
+        }
+        .footer-link:hover::after {
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="bg"></canvas>
+
+    <!-- NAVIGATION -->
+    <header class="flex justify-between items-center px-8 py-4 bg-black/30 backdrop-blur-xl fixed top-0 w-full z-50 border-b border-white/5">
+        <h1 class="text-2xl font-bold bg-gradient-to-r from-orange-400 to-yellow-500 bg-clip-text text-transparent">
+            📚 BookVerse India
+        </h1>
+        <nav class="hidden md:flex gap-8 text-sm font-medium text-gray-400">
+            <a href="#collections" class="hover:text-orange-400 transition">Collections</a>
+            <a href="#testimonials" class="hover:text-orange-400 transition">Testimonials</a>
+            <a href="#faq" class="hover:text-orange-400 transition">FAQs</a>
+        </nav>
+        <div class="flex gap-4">
+             <button class="bg-orange-600 hover:bg-orange-500 px-6 py-2 rounded-full font-semibold text-sm transition text-white">
+                Login
+            </button>
+        </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="min-h-[85vh] flex flex-col justify-center items-center text-center px-6 relative pt-24">
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#020617]"></div>
+        
+        <!-- 3D Book Animation Container -->
+        <div id="hero-canvas-container" class="z-10"></div>
+
+        <div class="z-10 -mt-10">
+            <h2 class="text-5xl md:text-7xl font-black tracking-tight leading-tight">
+                Uncover the World’s <span class="text-orange-500">Best Stories.</span>
+            </h2>
+            <p class="mt-6 text-gray-400 max-w-2xl text-lg mx-auto leading-relaxed">
+                The ultimate destination for Indian classics. Verified reviews, secure links, and nostalgic collections all in one place.
+            </p>
+            <div class="mt-10 flex gap-4 justify-center">
+                <a href="#collections" class="btn-buy px-8 py-4 rounded-full font-bold text-white shadow-xl">Explore Now</a>
+                <button class="glass-box px-8 py-4 rounded-full font-bold text-white border border-white/10 hover:bg-white/10 transition">Our Community</button>
+            </div>
+        </div>
+    </section>
+
+    <main class="max-w-7xl mx-auto px-6" id="collections">
+        <!-- COLLECTIONS -->
+        <div id="nagraj" class="mb-20 pt-16">
+            <h2 class="text-3xl font-bold mb-8 section-divider">🐍 Nagraj Comics (Raj Comics)</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="nagraj-grid"></div>
+        </div>
+
+        <div id="ack" class="mb-20">
+            <h2 class="text-3xl font-bold mb-8 section-divider">🕉️ Amar Chitra Katha</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="ack-grid"></div>
+        </div>
+
+        <div id="tmkoc" class="mb-20">
+            <h2 class="text-3xl font-bold mb-8 section-divider">👓 Tarak Mehta (Navbharat Sahitya Mandir)</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="tmkoc-grid"></div>
+        </div>
+
+        <!-- TESTIMONIALS -->
+        <section id="testimonials" class="py-20 border-t border-white/5">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold mb-4">What Our <span class="text-orange-500">Readers Say</span></h2>
+                <p class="text-gray-400">Trusted by over 10,000+ comic lovers across India.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="glass-box p-8 rounded-3xl">
+                    <div class="text-orange-400 mb-4 flex gap-1">★★★★★</div>
+                    <p class="text-gray-300 italic mb-6">"BookVerse made it so easy to find original Raj Comics. The links are authentic and the community reviews helped me pick the best titles."</p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center font-bold text-orange-400">MS</div>
+                        <div>
+                            <p class="font-bold text-sm">Manish Sharma</p>
+                            <p class="text-gray-500 text-xs text-uppercase">Verified Collector</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-box p-8 rounded-3xl">
+                    <div class="text-orange-400 mb-4 flex gap-1">★★★★★</div>
+                    <p class="text-gray-300 italic mb-6">"The nostalgia is real. Finally a clean place to browse the ACK classics without getting lost in dead links."</p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center font-bold text-blue-400">AK</div>
+                        <div>
+                            <p class="font-bold text-sm">Arjun Kapoor</p>
+                            <p class="text-gray-500 text-xs text-uppercase">Reader</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-box p-8 rounded-3xl">
+                    <div class="text-orange-400 mb-4 flex gap-1">★★★★★</div>
+                    <p class="text-gray-300 italic mb-6">"Writing reviews is so satisfying with the 3D animations. It actually feels like I'm part of a community."</p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center font-bold text-purple-400">SL</div>
+                        <div>
+                            <p class="font-bold text-sm">Sara L.</p>
+                            <p class="text-gray-500 text-xs text-uppercase">Comic Fan</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section id="faq" class="py-20 border-t border-white/5">
+            <h2 class="text-4xl font-bold mb-10 text-center">Frequently Asked <span class="text-orange-500">Questions</span></h2>
+            <div class="max-w-3xl mx-auto space-y-4">
+                <details class="glass-box p-6 rounded-2xl group cursor-pointer">
+                    <summary class="flex justify-between items-center font-semibold">
+                        How do I buy these books?
+                        <svg class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <p class="mt-4 text-gray-400 text-sm">Simply click the "Order Online" button on any card. We redirect you directly to the official publisher's shop to ensure you get genuine copies.</p>
+                </details>
+                <details class="glass-box p-6 rounded-2xl group cursor-pointer">
+                    <summary class="flex justify-between items-center font-semibold">
+                        Are reviews moderated?
+                        <svg class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <p class="mt-4 text-gray-400 text-sm">Yes, our community guidelines ensure that all reviews are helpful and respectful to the creators.</p>
+                </details>
+            </div>
+        </section>
+    </main>
+
+    <!-- PROFESSIONAL FOOTER SECTION -->
+    <footer class="mt-20 border-t border-white/10 bg-black/40 backdrop-blur-3xl pt-20 pb-10">
+        <div class="max-w-7xl mx-auto px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-16">
+                
+                <!-- Brand Identity -->
+                <div class="lg:col-span-4">
+                    <h2 class="text-3xl font-bold bg-gradient-to-r from-orange-400 to-yellow-500 bg-clip-text text-transparent mb-6">
+                        BookVerse India
+                    </h2>
+                    <p class="text-gray-400 leading-relaxed mb-8 text-sm">
+                        The premiere digital library and community hub for Indian comic culture and classic literature. We bridge the gap between nostalgic stories and modern readers.
+                    </p>
+                    <div class="flex gap-4">
+                        <a href="https://instagram.com/saeedmalek612" target="_blank" class="glass-box p-3 rounded-xl hover:bg-orange-500/20 hover:border-orange-500/50 transition">
+                            <svg class="w-5 h-5 text-orange-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                        </a>
+                        <a href="#" class="glass-box p-3 rounded-xl hover:bg-blue-500/20 hover:border-blue-500/50 transition">
+                            <svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <div class="lg:col-span-2">
+                    <h4 class="font-bold text-white mb-6">Explore</h4>
+                    <ul class="space-y-4 text-sm text-gray-400">
+                        <li><a href="#nagraj" class="footer-link hover:text-orange-400">Nagraj Universe</a></li>
+                        <li><a href="#ack" class="footer-link hover:text-orange-400">ACK Classics</a></li>
+                        <li><a href="#tmkoc" class="footer-link hover:text-orange-400">Tarak Mehta</a></li>
+                        <li><a href="#" class="footer-link hover:text-orange-400">New Arrivals</a></li>
+                    </ul>
+                </div>
+
+                <div class="lg:col-span-2">
+                    <h4 class="font-bold text-white mb-6">Company</h4>
+                    <ul class="space-y-4 text-sm text-gray-400">
+                        <li><a href="#" class="footer-link hover:text-orange-400">About Our Story</a></li>
+                        <li><a href="#" class="footer-link hover:text-orange-400">Official Partners</a></li>
+                        <li><a href="#" class="footer-link hover:text-orange-400">Privacy Policy</a></li>
+                        <li><a href="#" class="footer-link hover:text-orange-400">Terms of Use</a></li>
+                    </ul>
+                </div>
+
+                <!-- Newsletter -->
+                <div class="lg:col-span-4">
+                    <h4 class="font-bold text-white mb-6">Join the Inner Circle</h4>
+                    <p class="text-gray-400 text-sm mb-6">Get notified about rare comic re-prints and community events.</p>
+                    <div class="flex gap-2">
+                        <input type="email" placeholder="Your email address" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 transition">
+                        <button class="bg-orange-600 hover:bg-orange-500 px-6 py-3 rounded-xl font-bold text-sm transition text-white">
+                            Join
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Bottom Bar -->
+            <div class="border-t border-white/5 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
+                <p class="text-gray-500 text-xs">
+                    © 2026 BookVerse India. All intellectual property belongs to their respective publishers.
+                </p>
+                <div class="flex gap-8 text-[10px] uppercase tracking-widest font-bold text-gray-500">
+                    <span class="hover:text-white cursor-help transition">Made with ❤️ in India</span>
+                    <span class="hover:text-white cursor-help transition">v2.4.0 Stable</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- REVIEW MODAL -->
+    <div id="review-modal">
+        <div class="glass-box p-8 rounded-3xl w-full max-w-md mx-4 relative border border-orange-500/30">
+            <button id="close-modal" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl">✕</button>
+            <h2 class="text-2xl font-bold mb-2 text-orange-500" id="modal-book-title">Review Book</h2>
+            <p class="text-gray-400 text-sm mb-6">Share your experience with us.</p>
+            <form id="modal-review-form" class="grid gap-4">
+                <input type="text" id="reviewer-name" placeholder="Your Name" required class="p-3 rounded-xl bg-white/5 border border-white/10 outline-none focus:border-orange-500 text-sm text-white">
+                <div class="flex items-center gap-3">
+                    <span class="text-sm text-gray-300">Rating:</span>
+                    <div class="flex gap-1 text-gray-600" id="modal-stars" data-rating="0">
+                        <span class="star cursor-pointer hover:text-orange-400" data-value="1">☆</span>
+                        <span class="star cursor-pointer hover:text-orange-400" data-value="2">☆</span>
+                        <span class="star cursor-pointer hover:text-orange-400" data-value="3">☆</span>
+                        <span class="star cursor-pointer hover:text-orange-400" data-value="4">☆</span>
+                        <span class="star cursor-pointer hover:text-orange-400" data-value="5">☆</span>
+                    </div>
+                </div>
+                <textarea id="reviewer-text" placeholder="What did you think about this book?" required rows="3" class="p-3 rounded-xl bg-white/5 border border-white/10 outline-none focus:border-orange-500 text-sm resize-none text-white"></textarea>
+                <button type="submit" class="bg-orange-600 hover:bg-orange-500 p-4 rounded-xl font-bold transition-all active:scale-95 text-white">Submit Review</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST MESSAGE -->
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[1000] bg-orange-600 text-white px-8 py-4 rounded-2xl font-bold shadow-[0_0_30px_rgba(249,115,22,0.4)] transition-all opacity-0 translate-y-10 pointer-events-none flex items-center gap-3">
+        <span class="text-2xl">✨</span>
+        <div class="flex flex-col">
+            <span>Review Published!</span>
+            <span class="text-[10px] font-normal opacity-80">Thank you for contributing.</span>
+        </div>
+    </div>
+
+    <script>
+        const shopLinks = {
+            nagraj: "https://rajcomics.shop/",
+            ack: "https://www.amarchitrakatha.com/product-category/all-titles/",
+            tmkoc: "https://navbharatonline.com/authors/tarak-mehta.html"
+        };
+
+        const fakeReviews = [
+            { name: "Rahul Sharma", rating: 5, text: "Bachpan ki yaadein taza ho gayi! Quality is excellent." },
+            { name: "Priya Patel", rating: 4, text: "Must read for every Indian kid. Great service by BookVerse." },
+            { name: "Amit Verma", rating: 5, text: "Original print quality! Highly recommended for collectors." },
+            { name: "Sneha Gupta", rating: 5, text: "I bought this for my son, he loves the stories." }
+        ];
+
+        const nagrajBooks = ["Nagraj", "Nagraj Aur Bugaku", "Khazana", "Nag-Pasha", "Thodhi si Vish-Kanya", "Icchadhari", "Vinaash", "Nagadweepa"];
+        const ackBooks = ["Mahabharata", "Ramayana", "Krishna", "Hanuman", "Shiva Parvati", "Ganesha", "Vikramaditya", "Akbar Birbal"];
+        const tmkocBooks = ["Duniya Ne Undha Chashma Vol 1", "Tarak Mehta Na Tapuda", "Tarak Mehtani Navlikao", "Rok Sako To Rok Lo", "Bhuleshwar Ki Bhul Bhualaiya", "Kanyao! Karate Shikho", "Tarak Maheta Ka Tapuda", "Dedh Sayane Tarak Maheta Ki Diary"];
+
+        let currentCardId = null;
+
+        // --- THREE.JS GLOBAL STATE ---
+        const bgScene = new THREE.Scene();
+        const bgCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const bgRenderer = new THREE.WebGLRenderer({ canvas: document.querySelector('#bg'), antialias: true, alpha: true });
+        bgRenderer.setSize(window.innerWidth, window.innerHeight);
+        bgCamera.position.z = 50;
+
+        const starGeo = new THREE.BufferGeometry();
+        const starVerts = [];
+        for (let i = 0; i < 3000; i++) starVerts.push(THREE.MathUtils.randFloatSpread(1000), THREE.MathUtils.randFloatSpread(1000), THREE.MathUtils.randFloatSpread(1000));
+        starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starVerts, 3));
+        const starField = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0x444444, size: 0.7 }));
+        bgScene.add(starField);
+
+        let celebrationParticles = null;
+        let isCelebrating = false;
+        let celebrationTime = 0;
+
+        function createCelebration() {
+            const count = 200;
+            const geo = new THREE.BufferGeometry();
+            const pos = new Float32Array(count * 3);
+            const vel = new Float32Array(count * 3);
+            const colors = new Float32Array(count * 3);
+            for (let i = 0; i < count; i++) {
+                pos[i*3] = 0; pos[i*3+1] = 0; pos[i*3+2] = 20;
+                vel[i*3] = (Math.random() - 0.5) * 2; vel[i*3+1] = (Math.random() - 0.5) * 2; vel[i*3+2] = (Math.random() - 0.5) * 2;
+                colors[i*3] = 1; colors[i*3+1] = 0.5 + Math.random() * 0.5; colors[i*3+2] = 0;
+            }
+            geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+            geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            const mat = new THREE.PointsMaterial({ size: 0.8, vertexColors: true, transparent: true, opacity: 1 });
+            celebrationParticles = new THREE.Points(geo, mat);
+            celebrationParticles.velocities = vel;
+            bgScene.add(celebrationParticles);
+            isCelebrating = true;
+            celebrationTime = Date.now();
+        }
+
+        function updateCelebration() {
+            if (!celebrationParticles) return;
+            const positions = celebrationParticles.geometry.attributes.position.array;
+            const vels = celebrationParticles.velocities;
+            for (let i = 0; i < positions.length / 3; i++) {
+                positions[i*3] += vels[i*3]; positions[i*3+1] += vels[i*3+1]; positions[i*3+2] += vels[i*3+2];
+                vels[i*3+1] -= 0.01;
+            }
+            celebrationParticles.geometry.attributes.position.needsUpdate = true;
+            celebrationParticles.material.opacity -= 0.005;
+            if (Date.now() - celebrationTime > 3000) {
+                bgScene.remove(celebrationParticles);
+                celebrationParticles = null;
+                isCelebrating = false;
+            }
+        }
+
+        // --- CARDS ---
+        function createCard(title, author, category, id) {
+            const colorClass = category === 'nagraj' ? 'text-green-500' : category === 'ack' ? 'text-orange-500' : 'text-blue-500';
+            const review = fakeReviews[Math.floor(Math.random() * fakeReviews.length)];
+            let starsHtml = '';
+            for(let i=0; i<5; i++) starsHtml += `<span class="${i < review.rating ? 'text-orange-400' : 'text-gray-600'} text-[10px]">${i < review.rating ? '★' : '☆'}</span>`;
+
+            return `
+                <div class="card p-6 rounded-3xl" id="card-${id}">
+                    <div class="flex justify-between items-start">
+                         <span class="${colorClass} text-[10px] font-bold uppercase tracking-widest">${category}</span>
+                         <div class="flex gap-0.5" id="card-stars-${id}">${starsHtml}</div>
+                    </div>
+                    <h3 class="text-xl font-bold mt-1 text-white">${title}</h3>
+                    <p class="text-gray-400 text-xs italic">By ${author}</p>
+                    <div id="review-container-${id}" class="mt-4 p-3 bg-white/5 rounded-xl border border-white/5">
+                        <p class="text-gray-300 text-[11px] leading-relaxed italic" id="review-text-${id}">"${review.text}"</p>
+                        <p class="text-orange-500 text-[9px] mt-1 font-bold">Verified: <span id="reviewer-name-${id}">${review.name}</span></p>
+                    </div>
+                    <div class="flex flex-col gap-2 mt-6">
+                        <button onclick="openReviewModal('${title.replace(/'/g, "\\'")}', '${id}')" class="w-full py-2 px-4 rounded-xl border border-white/10 hover:border-white/30 transition text-xs font-semibold text-gray-300">Review</button>
+                        <a href="${shopLinks[category]}" target="_blank" class="w-full py-2 px-4 rounded-xl btn-buy text-center text-xs font-bold text-white shadow-lg">Order Online</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        function populateGrids() {
+            const data = { nagraj: nagrajBooks, ack: ackBooks, tmkoc: tmkocBooks };
+            const authors = { nagraj: 'Anupam Sinha', ack: 'Anant Pai', tmkoc: 'Tarak Mehta' };
+            Object.keys(data).forEach(cat => {
+                const grid = document.getElementById(`${cat}-grid`);
+                if(grid) data[cat].forEach((title, i) => grid.innerHTML += createCard(title, authors[cat], cat, `${cat}-${i}`));
+            });
+        }
+
+        // --- HERO 3D ---
+        let heroScene, heroCamera, heroRenderer, heroBook, mouseX = 0, mouseY = 0;
+
+        function initHero3D() {
+            const container = document.getElementById('hero-canvas-container');
+            if (!container) return;
+            heroScene = new THREE.Scene();
+            heroCamera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
+            heroRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            heroRenderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(heroRenderer.domElement);
+
+            const group = new THREE.Group();
+            const coverMat = new THREE.MeshPhongMaterial({ color: 0xf97316 });
+            group.add(new THREE.Mesh(new THREE.BoxGeometry(10, 14, 0.5), coverMat));
+            const pages = new THREE.Mesh(new THREE.BoxGeometry(9.5, 13.5, 1.5), new THREE.MeshPhongMaterial({ color: 0xffffeb }));
+            pages.position.z = -0.5;
+            group.add(pages);
+            const backCover = new THREE.Mesh(new THREE.BoxGeometry(10, 14, 0.5), coverMat);
+            backCover.position.z = -1.5;
+            group.add(backCover);
+            const spine = new THREE.Mesh(new THREE.BoxGeometry(2, 14, 2), coverMat);
+            spine.position.set(-5, 0, -0.75);
+            group.add(spine);
+
+            heroBook = group;
+            heroScene.add(heroBook);
+            heroScene.add(new THREE.AmbientLight(0xffffff, 0.8));
+            const pl = new THREE.PointLight(0xffffff, 1); pl.position.set(20, 20, 20); heroScene.add(pl);
+            heroCamera.position.z = 30;
+
+            container.addEventListener('mousemove', (e) => {
+                const rect = container.getBoundingClientRect();
+                mouseX = ((e.clientX - rect.left) / container.clientWidth) * 2 - 1;
+                mouseY = -((e.clientY - rect.top) / container.clientHeight) * 2 + 1;
+            });
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            starField.rotation.y += isCelebrating ? 0.05 : 0.0003;
+            if (isCelebrating) updateCelebration();
+            bgRenderer.render(bgScene, bgCamera);
+            if (heroBook) {
+                heroBook.rotation.y += 0.005;
+                heroBook.rotation.x = THREE.MathUtils.lerp(heroBook.rotation.x, mouseY * 0.5, 0.05);
+                heroBook.rotation.y = THREE.MathUtils.lerp(heroBook.rotation.y, mouseX * 0.8 + (Date.now() * 0.001), 0.05);
+                heroBook.position.y = Math.sin(Date.now() * 0.002) * 1.5;
+            }
+            if (heroRenderer) heroRenderer.render(heroScene, heroCamera);
+        }
+
+        // --- INTERACTION ---
+        const modal = document.getElementById('review-modal');
+        const modalStars = document.querySelectorAll('.star');
+        const starContainer = document.getElementById('modal-stars');
+        const toast = document.getElementById('toast');
+
+        function openReviewModal(title, id) { currentCardId = id; document.getElementById('modal-book-title').innerText = title; modal.style.display = 'flex'; }
+        document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
+
+        modalStars.forEach(star => {
+            star.onclick = () => {
+                const val = parseInt(star.dataset.value);
+                starContainer.dataset.rating = val;
+                modalStars.forEach((s, i) => {
+                    s.innerHTML = i < val ? '★' : '☆';
+                    s.style.color = i < val ? '#fb923c' : '#4b5563';
+                });
+            };
+        });
+
+        document.getElementById('modal-review-form').onsubmit = (e) => {
+            e.preventDefault();
+            const name = document.getElementById('reviewer-name').value;
+            const text = document.getElementById('reviewer-text').value;
+            const rating = parseInt(starContainer.dataset.rating) || 5;
+
+            if (currentCardId) {
+                document.getElementById(`reviewer-name-${currentCardId}`).innerText = name;
+                document.getElementById(`review-text-${currentCardId}`).innerText = `"${text}"`;
+                const starEl = document.getElementById(`card-stars-${currentCardId}`);
+                let sh = ''; for(let i=0; i<5; i++) sh += `<span class="${i < rating ? 'text-orange-400' : 'text-gray-600'} text-[10px]">${i < rating ? '★' : '☆'}</span>`;
+                starEl.innerHTML = sh;
+                createCelebration();
+                toast.style.opacity = '1'; toast.style.transform = 'translate(-50%, 0)'; toast.classList.add('celebrate-text');
+                setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translate(-50%, 40px)'; toast.classList.remove('celebrate-text'); }, 4000);
+            }
+            modal.style.display = 'none';
+        };
+
+        window.onload = () => { populateGrids(); initHero3D(); animate(); };
+        window.addEventListener('resize', () => {
+            bgCamera.aspect = window.innerWidth / window.innerHeight; bgCamera.updateProjectionMatrix(); bgRenderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
